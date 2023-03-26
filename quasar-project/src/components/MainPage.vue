@@ -1,15 +1,41 @@
 <template>
   <div class="q-pa-lg">
     <div class="q-gutter-md q-mt-lg">
-      <q-btn-sticky>
-      <q-btn icon="add" type="submit" label="Add Movie/Show" color="primary" class="q-mt-md" />
-    </q-btn-sticky>
-      <div class="q-mt-md" style="height: 100vh; display: flex; justify-content: center; align-items: center; overflow: auto;">
+      <q-btn @click="showAddForm = true">
+        <q-icon name="add" /> Add Movie/Show
+      </q-btn>
+
+      <q-btn size="lg" class="bg-red text-white" @click="refresh()"> FAVORITOS</q-btn>
+
+<br >
+<br >
+      <span> <strong>FEED PRINCIPAL </strong></span>
+      <div
+        v-if="showAddForm"
+        class="q-mt-md"
+        style="
+          height: 100vh;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          overflow: auto;
+        "
+      >
         <div class="q-pa-xs" style="max-width: 650px;">
-          <q-card v-for="movie in movies" :key="movie.id" class="q-mb-lg">
-            <q-card-section style="height: 150px;">
+            <div class="q-pa-xs" style="max-width: 650px;">
+            <q-form @submit.prevent="addMovie">
+              <q-input v-model="newMovie.title" label="Title" />
+              <q-btn type="submit" label="Add Movie" class="q-mt-md" />
+            </q-form>
+          </div>
+        </div>
+      </div>
+      <div class="q-mt-md">
+        <div v-for="movie in movies" :key="movie.id">
+          <q-card class="q-mb-lg">
+            <q-card-section style="height: 50px;">
+              <span>Nome do Filme/Série:</span>
               <div class="text-h6">{{ movie.title }}</div>
-              <q-avatar :src="movie.posterUrl" class="q-ml-sm" style="height: 100%;" />
             </q-card-section>
 
             <q-card-section>
@@ -17,14 +43,12 @@
               <span class="text-grey-8">{{ movie.releaseYear }}</span>
             </q-card-section>
 
-            <q-card-section>
-              {{ movie.description }}
-            </q-card-section>
+            <q-card-section>{{ movie.description }}</q-card-section>
 
             <q-card-actions>
-              <q-btn  icon="thumb_up" label="Like" color="primary" flat dense />
-              <q-btn  icon="thumb_down" label="Dislike" color="primary" flat dense />
-              <q-btn  icon="mail" label="Follow" color="primary" flat dense />
+              <q-btn icon="thumb_up" label="Like" color="primary" flat dense @click="likeMovie(movie.id)"/>
+              <q-btn icon="thumb_down" label="Dislike" color="primary" flat dense @click="dislikeMovie(movie.id)"/>
+              <q-btn icon="star" label="Follow" color="primary" flat dense />
             </q-card-actions>
           </q-card>
         </div>
@@ -34,39 +58,85 @@
 </template>
 
 <script>
+import axios from "axios";
+
 export default {
   data() {
     return {
-      movies: [
-        {
-          id: 1,
-          title: "The Godfather",
-          posterUrl: "https://via.placeholder.com/150x225.png?text=The+Godfather",
-          rating: 4,
-          releaseYear: 1972,
-          description:
-            "The aging patriarch of an organized crime dynasty transfers control of his clandestine empire to his reluctant son.",
-        },
-        {
-          id: 2,
-          title: "The Shawshank Redemption",
-          posterUrl: "https://via.placeholder.com/150x225.png?text=The+Shawshank+Redemption",
-          rating: 5,
-          releaseYear: 1994,
-          description:
-            "Two imprisoned men bond over a number of years, finding solace and eventual redemption through acts of common decency.",
-        },
-        {
-          id: 3,
-          title: "The Dark Knight",
-          posterUrl: "https://via.placeholder.com/150x225.png?text=The+Dark+Knight",
-          rating: 4.5,
-          releaseYear: 2008,
-          description:
-            "When the menace known as the Joker wreaks havoc and chaos on the people of Gotham, Batman must accept one of the greatest psychological and physical tests of his ability to fight injustice.",
-        },
-      ],
+      showAddForm: false,
+      movies: [],
+      newMovie: {
+        title: "",
+        rating: 0,
+      }
     };
+
+    
+    
   },
+  methods: {
+    likeMovie(movieId) {
+    axios.patch(`http://localhost:3000/movies/${movieId}`, {
+      rating: this.getLikedRating(),
+    })
+      .then(response => {
+        console.log(`Movie ${movieId} rating updated successfully.`);
+        // Refresh the movies feed to reflect the updated rating:
+        this.refresh();
+      })
+      .catch(error => {
+        console.log(`Error updating rating for movie ${movieId}:`, error);
+      });
+  },
+
+  getLikedRating() {
+   // Find the movie in the list of movies:
+    const movie = this.movies.find(m => m.id === movieId);
+
+    // Calculate the new rating value:
+    let newRating = movie.rating;
+    if (movie.rating < 5) {
+      newRating += 1;
+    }
+
+    return newRating;
+  },
+
+    addMovie() {
+    axios
+      .post("http://localhost:3000/movies", this.newMovie)
+      .then(response => {
+        this.movies.push(response.data);
+        this.showAddForm = false;
+        this.newMovie = {
+          title: "",
+        };
+      })
+      .catch(error => {
+        console.log(error);
+      });
+    },
+    refresh() {
+      this.$forceUpdate();
+      axios
+      .get("http://localhost:3000/movies")
+      .then(response => {
+        console.log(response.data[0].rating);
+      })
+      .catch(error => {
+        console.log(error);
+      });
+    }
+  },
+  mounted() {
+    axios
+      .get("http://localhost:3000/movies")
+      .then(response => {
+        this.movies = response.data;
+      })
+      .catch(error => {
+        console.log(error);
+      });
+  }
 };
 </script>
