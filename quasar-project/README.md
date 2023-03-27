@@ -6,17 +6,17 @@
 
 1.Instale a versao mais estável do node.js: https://nodejs.dev/pt/download/
 
-2.Certifique-se de ter o Node.js e o MongoDB instalados em sua máquina.
+2.Certifique-se de ter o Node.js (14.19 pra cima) e o MongoDB instalados em sua máquina.
 
-3.Faça o clone do repositório da API.
+3.Faça o clone do repositório.
 
-4.Abra o terminal no diretório da API.
+4.Abra o terminal no diretório da aplicacao (certifique-se que é o diretorio com todos os arquivos).
 
-5.Execute o comando npm install para instalar as dependências do projeto.
+5.Execute o comando "npm install" para instalar as dependências do projeto.
 
-6.Execute o comando "quasar dev" para iniciar o servidor da API. A API deve estar disponível em http://localhost:3000/ ou http://localhost:9000/.
+6.Execute o comando "quasar dev" para iniciar o servidor da API. A API deve estar disponível em http://localhost:8080/ ou http://localhost:9000/ (mas aparece no terminal).
 
-7.Se algo ocorrer errado com o "quasar dev", instale tambem o quasar diretamente: npm install -g @quasar/cli
+7.Se algo ocorrer errado com o "quasar dev", instale tambem o quasar diretamente com o comando: "npm install -g @quasar/cli"
 
 8.Agora certifique-se que o servidor api está rodando, pode fazer um ping, acessando: http://localhost:3000/ping
 
