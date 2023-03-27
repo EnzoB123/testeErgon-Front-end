@@ -6,47 +6,88 @@
       </q-layout-header>
 
       <q-layout-view>
-        <q-form @submit.prevent="login" class="q-mt-xs">
-          <q-field class="q-mb-sm" :max-width="getInputWidth()">
-            <q-input v-model="email" label="email" dense outlined />
-          </q-field>
-          <q-field class="q-mb-sm" :max-width="getInputWidth()" >
-            <q-input v-model="password" label="Password" dense outlined type="password" />
-          </q-field>
-          <q-btn type="submit" label="Log In" color="primary" class="q-mt-md" @click="login()" />
-          <br >
-        </q-form>
+        <div v-if="!showRegistrationForm">
+          <q-form @submit.prevent="login" class="q-mt-xs">
+            <q-field class="q-mb-sm" :max-width="getInputWidth()">
+              <q-input v-model="email" label="email" dense outlined />
+            </q-field>
+            <q-field class="q-mb-sm" :max-width="getInputWidth()" >
+              <q-input v-model="password" label="Password" dense outlined type="password" />
+            </q-field>
+            <q-btn type="submit" label="Log In" color="primary" class="q-mt-md" />
+            <br />
+          </q-form>
 
-        <q-btn type="submit" label="asdas" color="primary" class="q-mt-md" @click="registrar()"/>
+          <q-btn label="Registrar" color="secondary" class="q-mt-md" @click="showRegistrationForm = true" />
+        </div>
+
+        <div v-if="showRegistrationForm">
+          <q-form @submit.prevent="register" class="q-mt-md">
+            <q-field class="q-mb-sm" :max-width="getInputWidth()">
+              <q-input v-model="nome" label="Nome" dense outlined />
+            </q-field>
+            <q-field class="q-mb-sm" :max-width="getInputWidth()">
+              <q-input v-model="email" label="E-mail" dense outlined />
+            </q-field>
+            <q-field class="q-mb-sm" :max-width="getInputWidth()">
+              <q-input v-model="password" label="Senha" dense outlined type="password" />
+            </q-field>
+            <q-btn type="submit" label="Registrar" color="positive" class="q-mt-md" />
+            <q-btn label="Cancelar" class="q-ml-md q-mt-md" @click="showRegistrationForm = false" color="negative"/>
+            <br />
+          </q-form>
+        </div>
       </q-layout-view>
     </q-layout>
   </div>
 </template>
 
-
-
 <script>
-import axios from 'axios' 
+
 
 export default {
   data() {
     return {
+      nome: "",
       email: "",
       password: "",
+      showRegistrationForm: false,
     };
   },
   methods: {
 
-    
 
-     registrar() {
-      console.log("registrou")
+
+    async register() {
+      // Send a POST request to your API with the user's name, email, and password
+      try {
+        // Send a POST request to your API with the new user's information
+        const response = await this.$api.post('/users', {
+          nome: this.nome,
+          email: this.email,
+          password: this.password,
+        });
+        console.log(response);
+        if (response) {
+
+          this.showRegistrationForm = false;
+
+          alert("USUARIO CRIADO COM SUCESSO")
+
+          //await this.$router.push('/main');
+        } else {
+          alert('Error creating account. Please check your information and try again.');
+        }
+      }
+      catch(error){
+        console.log(error)
+      }
     },
 
      async login() {
       // Send a POST request to your API with the email and password
       try {
-        const response = await axios.post('http://localhost:3000/users/login', {
+        const response = await this.$api.post('/users/login', {
           email: this.email,
           password: this.password
         });
@@ -61,7 +102,7 @@ export default {
         alert('Error logging in. Please check your email and password and try again.');
       }
     },
-   
+
      getInputWidth() {
       // Compute the maximum width of the input boxes based on the window size
       const screenWidth = window.innerWidth;
@@ -69,8 +110,8 @@ export default {
       return `${maxWidth}px`;
     },
   },
-   
-   
+
+
   }
 
 </script>

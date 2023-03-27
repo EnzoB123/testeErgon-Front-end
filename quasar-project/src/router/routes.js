@@ -1,5 +1,6 @@
 import LoginPage from "../components/LoginPage.vue";
 import MainPage from "../components/MainPage.vue";
+import Favorites from "../components/FavoritesPage.vue";
 
 const routes = [
   // {
@@ -16,6 +17,12 @@ const routes = [
   {
     path: "/main",
     component: MainPage,
+  },
+
+  {
+    path: '/favorites',
+    name: 'FavoritesPage',
+    component: Favorites
   },
 
   // Always leave this as last one,
