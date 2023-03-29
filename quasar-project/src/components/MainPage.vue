@@ -43,8 +43,8 @@
       <q-layout justify-center align-center>
         <div class="q-pa-xs" style="max-width: 650px">
           <div class="q-pa-xs" style="max-width: 650px">
-            <q-form @submit.prevent="addMovie">
-              <q-input v-model="newMovie.title" label="Título do Filme" />
+            <q-form @submit.prevent="addMovie(this.userId)">
+              <q-input v-model="newMovie" label="Título do Filme" />
               <q-btn type="submit" label="Adicionar Filme" class="q-mt-md" />
               <q-btn label="Cancelar" class="q-ml-md q-mt-md" @click="showAddForm = false" />
             </q-form>
@@ -114,10 +114,12 @@ export default {
       showAddForm: false,
       movies: [],
       newMovie: {
+        userId: "",
         title: "",
         liked: [],
         disliked: [],
         followers: [],
+        finished: false
       },
     };
   },
@@ -143,11 +145,12 @@ export default {
         .then(response => {
           console.log(`Movie ${movieId} deleted successfully.`);
           // Refresh the movies feed to reflect the deleted movie:
-          this.refresh();
         })
         .catch(error => {
           console.error(`Failed to delete movie ${movieId}:`, error);
         });
+
+        this.refresh()
     },
     async logout() {
       const token = localStorage.getItem('token');
@@ -181,7 +184,6 @@ export default {
       .then(response => {
         console.log(`Movie ${movieId} rating updated successfully.`);
         // Refresh the movies feed to reflect the updated rating:
-        this.refresh();
       })
       .catch(error => {
         console.error(`Failed to update movie ${movieId} rating:`, error);
@@ -211,7 +213,6 @@ export default {
       .then(response => {
         console.log(`Movie ${movieId} rating updated successfully.`);
         // Refresh the movies feed to reflect the updated rating:
-        this.refresh();
       })
       .catch(error => {
         console.error(`Failed to update movie ${movieId} rating:`, error);
@@ -241,7 +242,6 @@ export default {
       .then(response => {
         console.log(`Movie ${movieId} rating updated successfully.`);
         // Refresh the movies feed to reflect the updated rating:
-        this.refresh();
       })
       .catch(error => {
         console.error(`Failed to update movie ${movieId} rating:`, error);
@@ -251,14 +251,23 @@ export default {
     },
 
 
-    addMovie() {
+    addMovie(userId) {
+
+      console.log("MOVIE TITLE", this.newMovie)
+      console.log("MOVIE USERID ", userId)
+
       axios
-        .post("http://localhost:3000/movies", this.newMovie)
+        .post("http://localhost:3000/movies", {
+
+          title: this.newMovie.toString(),
+          userId: userId.toString()
+        })
         .then((response) => {
           this.movies.push(response.data);
           this.showAddForm = false;
           this.newMovie = {
             title: "",
+            userId: ""
           };
         })
         .catch((error) => {
@@ -266,9 +275,20 @@ export default {
         });
     },
     refresh() {
+      axios
+      .get("http://localhost:3000/movies")
+      .then((response) => {
+        this.movies = response.data;
+      })
+      .catch((error) => {
+        console.log(error);
+      });
       this.$forceUpdate();
     },
+
   },
+
+
   mounted() {
       const token = localStorage.getItem('token');
       // Decode the token
