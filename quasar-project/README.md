@@ -20,6 +20,8 @@
 
 8.Agora certifique-se que o servidor api está rodando, pode fazer um ping, acessando: http://localhost:3000/ping
 
+9.Quando for criar um novo usuário, o campo e-mail precisa ser do tipo email("user@mail.com").
+
 
 
 ---------------------------------------------------------------------------------------------------------------------
