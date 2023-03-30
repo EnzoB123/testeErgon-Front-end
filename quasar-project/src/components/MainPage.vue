@@ -44,7 +44,7 @@
         <div class="q-pa-xs" style="max-width: 650px">
           <div class="q-pa-xs" style="max-width: 650px">
             <q-form @submit.prevent="addMovie(this.userId)">
-              <q-input v-model="newMovie" label="Título do Filme" />
+              <q-input v-model="newMovie.title" label="Título do Filme" />
               <q-btn type="submit" label="Adicionar Filme" class="q-mt-md" />
               <q-btn label="Cancelar" class="q-ml-md q-mt-md" @click="showAddForm = false" />
             </q-form>
@@ -64,7 +64,7 @@
             <br >
 
             <q-card-actions>
-              <q-btn
+              <q-btn v-if="isFinished(movie)"
                 icon="thumb_up"
                 label="Like"
                 color="positive"
@@ -72,7 +72,7 @@
                 dense
                 @click="likeMovie(movie.movieId, this.userId)"
               />
-              <q-btn
+              <q-btn v-if="isFinished(movie)"
                 icon="thumb_down"
                 label="Dislike"
                 color="negative"
@@ -81,13 +81,23 @@
                 @click="dislikeMovie(movie.movieId, this.userId)"
               />
 
-              <q-btn
+              <q-btn v-if=" isFinished(movie)"
                 icon="star"
                 label="Acompanhar"
                 color="secondary"
                 flat
                 dense
                 @click="followMovie(movie.movieId, this.userId)"
+              />
+
+              <q-btn v-if="(isFinished(movie))"
+
+                icon="delete"
+                label="Terminar"
+                color="negative"
+                flat
+                dense
+                @click="finishMovie(movie)"
               />
 
               <q-item-section side>
@@ -106,6 +116,7 @@
 <script>
 import axios from "axios";
 import jwt_decode from 'jwt-decode';
+import { getCurrentInstance } from 'vue';
 
 export default {
   data() {
@@ -124,6 +135,23 @@ export default {
     };
   },
   methods: {
+    isFinished(movie) {
+      console.log('userId', this?.userId)
+      console.log('movieId', movie?.movieId)
+      console.log('finished', movie?.finished)
+
+      if (movie?.userId == this.userId && movie?.finished == false){
+        return true
+      }
+
+      return false
+    },
+    finishMovie(movie) {
+
+      movie.finished = true
+
+      this.refresh()
+    },
     canDeleteMovie(movie) {
     // Check if the movie has any likes, dislikes, or followers
       if (movie.liked && movie.liked.length || movie.disliked && movie.disliked.length || movie.followers && movie.followers.length) {
@@ -259,20 +287,28 @@ export default {
       axios
         .post("http://localhost:3000/movies", {
 
-          title: this.newMovie.toString(),
-          userId: userId.toString()
+          title: Object(this.newMovie.title).toString(),
+          userId: userId.toString(),
+          liked: [],
+          disliked: [],
+          followers: [],
+          finished: false
         })
         .then((response) => {
+          console.log("response data", response.data)
           this.movies.push(response.data);
           this.showAddForm = false;
           this.newMovie = {
             title: "",
-            userId: ""
+            userId: "",
+            finished: false
           };
         })
         .catch((error) => {
           console.log(error);
         });
+
+        this.refresh()
     },
     refresh() {
       axios
@@ -283,7 +319,9 @@ export default {
       .catch((error) => {
         console.log(error);
       });
-      this.$forceUpdate();
+
+      const instance = getCurrentInstance();
+      instance.proxy.forceUpdate();
     },
 
   },
